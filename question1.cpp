@@ -2,43 +2,40 @@
 using namespace std;
 
 string plusMult(vector<long long> A) {
-    auto calculate = [&](int start) -> long long {
-        vector<long long> elements;
+    int n = (int)A.size();
 
-        for (int i = start; i < (int)A.size(); i += 2) {
-            elements.push_back(A[i]);
+    // Only parity is required, so every value can be reduced modulo 2.
+    auto calculate = [&](int start) -> int {
+        vector<int> v;
+        for (int i = start; i < n; i += 2) {
+            v.push_back((int)((A[i] % 2 + 2) % 2));
         }
 
-        if (elements.size() < 2)
-            return elements.empty() ? 0 : elements[0] % 2;
+        if (v.empty()) return 0;
+        if (v.size() == 1) return v[0];
 
-        long long result = elements[0] * elements[1];
+        int result = v[0] * v[1] % 2;
 
-        for (int i = 2; i < (int)elements.size(); i++) {
+        // Operations alternate: +, *, +, *, ...
+        for (int i = 2; i < (int)v.size(); ++i) {
             if (i % 2 == 0)
-                result += elements[i];
+                result = (result + v[i]) % 2;
             else
-                result *= elements[i];
+                result = (result * v[i]) % 2;
         }
-
-        return ((result % 2) + 2) % 2;
+        return result;
     };
 
-    long long R_even = calculate(0);
-    long long R_odd = calculate(1);
+    int R_even = calculate(0);
+    int R_odd  = calculate(1);
 
-    if (R_odd > R_even)
-        return "ODD";
-    else if (R_even > R_odd)
-        return "EVEN";
-    else
-        return "NEUTRAL";
+    if (R_even > R_odd) return "EVEN";
+    if (R_odd > R_even) return "ODD";
+    return "NEUTRAL";
 }
 
 int main() {
     vector<long long> A = {2, 3, 5, 7, 13, 12};
-
     cout << plusMult(A) << endl;
-
     return 0;
 }
