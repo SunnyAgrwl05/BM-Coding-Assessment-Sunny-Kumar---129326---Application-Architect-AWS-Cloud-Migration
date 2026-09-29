@@ -1,88 +1,138 @@
-# IBM Coding Assessment — Sunny Kumar
+# IBM Coding Assessment — Solutions
 
-Application: 129326 — Application Architect - AWS Cloud Migration
+This repository contains detailed solutions for two coding assessment problems.
 
-This repository contains solutions and detailed explanations for the two assessment problems.
+## Question 1 — Maximum XOR Sum
 
-## Question 1 — Plus/Multiply Parity
+### Problem Statement
 
-### Problem
+Given two integer arrays arr1 and arr2 of equal length n, consider every possible pair of elements:
 
-Given an array of integers, split the elements into two sequences based on their positions:
-- Even-indexed sequence: positions 0, 2, 4, ...
-- Odd-indexed sequence: positions 1, 3, 5, ...
+arr1[i] XOR arr2[j]
 
-For each sequence, start with multiplication of the first two elements and then alternate between addition and multiplication for the remaining elements.
+for all 0 <= i,j < n.
 
-Example:
+Calculate the sum of all these XOR values and return the result modulo 10^9 + 7.
 
-    A = [2, 3, 5, 7, 13, 12]
-    Even positions -> [2, 5, 13]
-    Odd positions  -> [3, 7, 12]
+A direct approach would construct an n × n matrix and take O(n²) time.
 
-The implementation calculates the parity of each resulting value. It then returns EVEN, ODD, or NEUTRAL according to the comparison of the two parity values.
+### Example
 
-### Approach
+arr1 = [1, 2, 3]
+arr2 = [10, 10, 10]
 
-1. Traverse the array starting at index 0 to process even positions.
-2. Traverse the array starting at index 1 to process odd positions.
-3. Start each calculation with multiplication of the first two selected elements.
-4. Alternate addition and multiplication for the remaining elements.
-5. Take the result modulo 2 because only parity is required.
-6. Compare the two parity values.
+The XOR matrix is:
 
-### Complexity
+[ 11  11  11 ]
+[  8   8   8 ]
+[  9   9   9 ]
 
-- Time: O(n)
-- Auxiliary space: O(n), because the implementation stores the selected elements.
+Answer = 11 + 11 + 11 + 8 + 8 + 8 + 9 + 9 + 9 = 84
 
-### Solution
+### Approach — Bit Counting
 
-See question1.cpp.
+XOR can be calculated independently for every bit.
 
-## Question 2 — Customer Site Metrics
+1. Count the elements of arr1 having the current bit set.
+2. Count the elements of arr2 having the current bit set.
+3. An XOR bit is 1 when the two corresponding bits are different.
+4. If x elements of arr1 and y elements of arr2 have the bit set, the number of pairs producing XOR bit 1 is:
 
-### Problem
+x × (n-y) + (n-x) × y
 
-Given a customers table containing customer id and email, and a site_metrics table containing customer_id, CPU usage, memory usage and disk usage, find customers whose average CPU, memory, or disk usage is greater than 50.
+5. Multiply this count by the bit value and add it to the answer.
 
-For every matching customer, return:
-- Customer email
-- Average CPU usage
-- Average memory usage
-- Average disk usage
-
-The averages are rounded to 2 decimal places and the final result is ordered by email.
-
-### Approach
-
-1. JOIN customers with site_metrics using customers.id = site_metrics.customer_id.
-2. GROUP BY customer id and email so metrics are aggregated per customer.
-3. Calculate AVG for CPU, memory and disk usage.
-4. Use ROUND(..., 2) for two decimal places.
-5. Use HAVING because the filtering conditions depend on aggregate values.
-6. Keep a customer when at least one average is greater than 50.
-7. Sort the result by customer email in ascending order.
+This avoids constructing the full n × n matrix.
 
 ### Complexity
 
-The exact runtime depends on the database engine, table size, indexes and query optimizer. The query performs a join, grouping and three aggregate calculations.
+Time: O(31 × n), effectively O(n)
+Space: O(1)
 
 ### Solution
 
-See question2.sql.
+See Question1_MaximumXorSum.cpp.
+
+---
+
+## Question 2 — Checksum Aggregation
+
+### Problem Statement
+
+For every pair of packet identifiers i and j:
+
+C(i,j) = i % j + j % i
+
+where 1 <= i <= n and 1 <= j <= n.
+
+Calculate the sum of C(i,j) for all pairs and return it modulo 10^9 + 7.
+
+### Examples
+
+n = 2  -> 2
+n = 3  -> 10
+n = 4  -> 24
+
+For n = 2:
+
+C(1,1) = 0
+C(1,2) = 1
+C(2,1) = 1
+C(2,2) = 0
+
+Total = 2
+
+### Approach
+
+The checksum is symmetric:
+
+C(i,j) = C(j,i)
+
+Therefore, calculate only pairs where i > j and multiply the result by 2.
+
+For i > j:
+
+j % i = j
+
+so C(i,j) = i % j + j.
+
+For a fixed j, instead of calculating i % j for every i, use quotient and remainder:
+
+q = n / j
+r = n % j
+
+The sum of remainders for i = 1 ... n is:
+
+q × j × (j-1) / 2 + r × (r+1) / 2
+
+Remove the contribution for i <= j, add j for every i > j, and finally multiply by 2 for the symmetric half.
+
+### Complexity
+
+Time: O(n)
+Space: O(1)
+
+### Solution
+
+See Question2_ChecksumAggregation.cpp.
+
+---
 
 ## Repository Structure
 
-    .
-    ├── README.md
-    ├── question1.cpp
-    └── question2.sql
+README.md
+Question1_MaximumXorSum.cpp
+Question2_ChecksumAggregation.cpp
 
-## Technologies
+## Concepts Covered
 
-- C++
-- SQL
-- JOIN and aggregation
-- GROUP BY and HAVING
-- Algorithmic problem solving
+- Bit Manipulation
+- XOR Properties
+- Modular Arithmetic
+- Quotient and Remainder
+- Mathematical Optimization
+- Complexity Optimization
+
+## Language
+
+C++
